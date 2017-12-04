@@ -1,0 +1,24 @@
+(load "grep.carp")
+(load "Test.carp")
+
+(use Grep)
+(use Test)
+
+(defn main []
+    (with-test test
+      (assert-equal test
+                    \.
+                    (String.head ".")
+                    "head works"
+      )
+      (assert-equal test
+                    "ew"
+                    &(String.tail "new")
+                    "tail works"
+      )
+      (assert-true test (match ".*md" "i_am_markdown.md") ".* matches")
+      (assert-false test (match ".*md" "i_am_not_markdown.html") ".* doesn’t match on invalid")
+      (assert-true test (match "^...chron" "anachronism") "^ and . match")
+      (assert-false test (match "^...chron" "parachronism") "^ and . do not match on invalid")
+      (assert-false test (match "^...chron$" "anachronism") "$ does not match on invalid")
+      (print-test-results test)))

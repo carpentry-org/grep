@@ -1,0 +1,50 @@
+(local-include "../grep.h")
+
+(use Int)
+
+(defmodule String
+  (register head (λ [(Ref String)] Char))
+  (register tail (λ [(Ref String)] String))
+
+  (defn empty? [s]
+    (= (count s) 0))
+)
+
+(defmodule Grep
+  (defn match-here [regexp text]
+    (cond
+      (empty? text) true
+      (and (> (count regexp) 1) (= (head &(tail regexp)) \*))
+        (match-star (head regexp) &(tail &(tail regexp)) text)
+      (and (= (head regexp) \$)
+           (= (count regexp) 1))
+        (empty? text)
+      (and (not (empty? text))
+           (or (= (head regexp) \.)
+               (= (head regexp) (head text))))
+        (do (IO.println &(tail text)) (IO.println &(tail regexp))
+        (match-here &(tail regexp) &(tail text)))
+      false))
+
+  (defn match-star [chr regex text]
+    (let [matched true]
+      (do
+        (while (and matched (match-here regex text))
+          (if (or (empty? text)
+                  (and (not (= (head text) chr))
+                       (not (= chr \.))))
+            (set! &matched false)
+            (set! &text &(tail text))))
+        matched)))
+
+  (defn match [regexp text]
+    (if (= (head regexp) \^)
+      (match-here &(tail regexp) text)
+      (let [matched false]
+        (do
+          (while (and (not matched) (not (empty? text)))
+            (if (match-here regexp text)
+              (set! &matched true)
+              (set! &text &(tail text))))
+          matched))))
+)
