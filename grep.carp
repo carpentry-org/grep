@@ -1,5 +1,7 @@
 (local-include "../grep.h")
 
+;(add-cflag "-fsanitize=address")
+
 (use Int)
 
 (defmodule String
@@ -10,30 +12,37 @@
     (= (count s) 0))
 )
 
+(defmacro short-and [x y]
+  (list 'if x y false))
+
 (defmodule Grep
+  (register match-star (Fn [Char (Ref String) (Ref String)] Bool))
+  (register match-here (Fn [(Ref String) (Ref String)] Bool))
+
   (defn match-here [regexp text]
     (cond
-      (empty? text) true
-      (and (> (count regexp) 1) (= (head &(tail regexp)) \*))
-        (match-star (head regexp) &(tail &(tail regexp)) text)
+      (empty? regexp) true
+      (short-and (> (count regexp) 1) (= (head &(tail regexp)) \*))
+          (match-star (head regexp) &(tail &(tail regexp)) text)
       (and (= (head regexp) \$)
            (= (count regexp) 1))
         (empty? text)
-      (and (not (empty? text))
-           (or (= (head regexp) \.)
-               (= (head regexp) (head text))))
-        (do (IO.println &(tail text)) (IO.println &(tail regexp))
-        (match-here &(tail regexp) &(tail text)))
+      (short-and (not (empty? text))
+                 (or (= (head regexp) \.)
+                     (= (head regexp) (head text))))
+        (match-here &(tail regexp) &(tail text))
       false))
 
   (defn match-star [chr regex text]
-    (let [matched true]
+    (let [matched true brk false]
       (do
-        (while (and matched (match-here regex text))
-          (if (or (empty? text)
-                  (and (not (= (head text) chr))
-                       (not (= chr \.))))
-            (set! &matched false)
+        (while (and matched (not brk))
+          (cond
+            (match-here regex text) (set! &brk true)
+            (or (empty? text)
+                (and (not (= (head text) chr))
+                     (not (= chr \.))))
+              (set! &matched false)
             (set! &text &(tail text))))
         matched)))
 
