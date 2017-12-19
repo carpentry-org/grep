@@ -1,16 +1,4 @@
-(local-include "../grep.h")
-
-;(add-cflag "-fsanitize=address")
-
 (use Int)
-
-(defmodule String
-  (register head (λ [(Ref String)] Char))
-  (register tail (λ [(Ref String)] String))
-
-  (defn empty? [s]
-    (= (count s) 0))
-)
 
 (defmacro short-and [x y]
   (list 'if x y false))
