@@ -22,16 +22,16 @@
       false))
 
   (defn match-star [chr regex text]
-    (let [matched true brk false]
+    (let [matched true]
       (do
-        (while (and matched (not brk))
+        (while matched
           (cond
-            (match-here regex text) (set! &brk true)
+            (match-here regex text) (break)
             (or (empty? text)
                 (and (not (= (head text) chr))
                      (not (= chr \.))))
-              (set! &matched false)
-            (set! &text &(tail text))))
+              (set! matched false)
+            (set! text &(tail text))))
         matched)))
 
   (defn match [regexp text]
@@ -41,7 +41,7 @@
         (do
           (while (and (not matched) (not (empty? text)))
             (if (match-here regexp text)
-              (set! &matched true)
-              (set! &text &(tail text))))
+              (set! matched true)
+              (set! text &(tail text))))
           matched))))
 )
