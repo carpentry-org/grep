@@ -1,8 +1,5 @@
 (use Int)
 
-(defmacro short-and [x y]
-  (list 'if x y false))
-
 (defmodule Grep
   (register match-star (Fn [Char (Ref String) (Ref String)] Bool))
   (register match-here (Fn [(Ref String) (Ref String)] Bool))
@@ -10,14 +7,14 @@
   (defn match-here [regexp text]
     (cond
       (empty? regexp) true
-      (short-and (> (count regexp) 1) (= (head &(tail regexp)) \*))
+      (and (> (length regexp) 1) (= (head &(tail regexp)) \*))
           (match-star (head regexp) &(tail &(tail regexp)) text)
       (and (= (head regexp) \$)
-           (= (count regexp) 1))
+           (= (length regexp) 1))
         (empty? text)
-      (short-and (not (empty? text))
-                 (or (= (head regexp) \.)
-                     (= (head regexp) (head text))))
+      (and (not (empty? text))
+           (or (= (head regexp) \.)
+               (= (head regexp) (head text))))
         (match-here &(tail regexp) &(tail text))
       false))
 

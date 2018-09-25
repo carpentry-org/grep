@@ -20,5 +20,4 @@
       (assert-false test (match ".*md" "i_am_not_markdown.html") ".* doesn’t match on invalid")
       (assert-true test (match "^...chron" "anachronism") "^ and . match")
       (assert-false test (match "^...chron" "parachronism") "^ and . do not match on invalid")
-      (assert-false test (match "^...chron$" "anachronism") "$ does not match on invalid")
-      (print-test-results test)))
+      (assert-false test (match "^...chron$" "anachronism") "$ does not match on invalid")))
